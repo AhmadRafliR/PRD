@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Mud Monitor | Prototipe Pendeteksi Kick</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-container": "#424cb5",
+                        "on-tertiary-container": "#c7caff",
+                        "on-secondary-container": "#541100",
+                        "on-surface-variant": "#434750",
+                        "tertiary-fixed-dim": "#bdc2ff",
+                        "on-primary-fixed": "#001b3f",
+                        "on-background": "#161c1f",
+                        "primary-fixed-dim": "#abc7ff",
+                        "inverse-primary": "#abc7ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#ffdbd1",
+                        "outline": "#737782",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d5dbdf",
+                        "surface-container-highest": "#dde3e7",
+                        "surface-container-low": "#eef4f8",
+                        "tertiary-fixed": "#e0e0ff",
+                        "on-secondary-fixed": "#3b0900",
+                        "inverse-on-surface": "#ecf2f6",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f4fafe",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "background": "#f4fafe",
+                        "primary-fixed": "#d7e3ff",
+                        "tertiary": "#28329c",
+                        "primary-container": "#2b579a",
+                        "inverse-surface": "#2b3134",
+                        "surface-tint": "#335ea1",
+                        "surface": "#f4fafe",
+                        "on-primary-fixed-variant": "#134688",
+                        "on-tertiary-fixed-variant": "#2f3aa3",
+                        "on-primary-container": "#b7cfff",
+                        "secondary-container": "#fe5825",
+                        "secondary-fixed-dim": "#ffb5a0",
+                        "on-tertiary-fixed": "#000767",
+                        "on-surface": "#161c1f",
+                        "on-secondary-fixed-variant": "#872100",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#dde3e7",
+                        "surface-container": "#e9eff3",
+                        "secondary": "#b02e00",
+                        "surface-container-high": "#e3e9ed",
+                        "outline-variant": "#c3c6d2",
+                        "on-error-container": "#93000a",
+                        "primary": "#063f81"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+        
+        /* === CSS Ilustrasi Animasi Well Kick === */
+        :root {
+            --mud-color: #795548;
+            --well-border: #424242;
+        }
+        .visual-area {
+            position: relative; width: 150px; height: 400px;
+            display: flex; justify-content: center; align-items: flex-end;
+            margin: 0 auto;
+        }
+        .wellbore {
+            width: 80px; height: 350px; background-color: #d7ccc8;
+            border-left: 20px solid var(--well-border); border-right: 20px solid var(--well-border); border-bottom: 20px solid var(--well-border);
+            position: relative; border-radius: 0 0 12px 12px; z-index: 2;
+        }
+        .mud {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background-color: var(--mud-color); transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); z-index: 3;
+        }
+        .gas-bubble {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(200,200,200,0.6));
+            border-radius: 50%; transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 4; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.2);
+            width: 0px; height: 0px; bottom: 10px; opacity: 0;
+        }
+        .blowout-explosion {
+            position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+            width: 250px; height: 150px; background: radial-gradient(circle, #ff5722 10%, #ff9800 40%, transparent 70%);
+            opacity: 0; transition: opacity 0.3s ease-in;
+            z-index: 5; pointer-events: none; filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
+    
+    <nav class="fixed top-0 w-full z-50 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(22,28,31,0.06)]">
+        <div class="flex justify-between items-center h-20 px-8 w-full max-w-screen-2xl mx-auto">
+            <div class="font-['Space_Grotesk'] font-bold tracking-tighter text-blue-900 dark:text-blue-100 text-2xl">
+                Mud Monitor
+            </div>
+            <div class="hidden md:flex items-center space-x-8 font-['Space_Grotesk'] tracking-tight">
+                <a class="text-blue-900 dark:text-blue-100 border-b-2 border-blue-900 dark:border-blue-400 pb-1" href="#">Beranda</a>
+                <a class="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#Analisis">Konsep</a>
+                <a class="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="Illustration.html">Prototipe</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="kelompok.html">
+                    <button class="bg-primary text-on-primary px-6 py-2.5 rounded-full font-medium hover:opacity-90 active:scale-95 transition-all text-sm uppercase tracking-wider">
+                        Kelompok 9
+                    </button> 
+                </a>
+                <img alt="Lead Engineer Profile" class="w-10 h-10 rounded-full border-2 border-primary-container/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc3Hg6D75aGovoC9d4IizCWceNFfoBLihIq7MboKBm18IODOu766sA48z2nmid7uUDdAiPggFxiVq_9b1K8uVXCcJDqg0ChrHhdFFD7sKRAjw_WR6MI_kQFXONTLoBOb2WngR1MZWBrj3yOi6nskg3w4-aGBzAD3vXlB-22L3jyt6_4iMWsrkq8USYPrVfmoYNrzx4tn1rUczdW4cge1ZKX3FH5sMi35vpWhTKuKLsT8avZGikYs-8-OvDASVfOd-RRB7vcgCi1daP"/>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-20">
+        <section class="relative min-h-[921px] flex items-center overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <img class="w-full h-full object-cover" data-alt="Modern offshore drilling rig at twilight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrPddskerScTGeE2LgW2zEExO6ypiu-_zP7DkqwRXcpil6UrJdfeSefgR8lK15QLCbYikdLQH6iJGDlaEUCBVJ3FWPTr-29NL3mxu55ZdE4DKWTcmi91hz62-hTPzsZtDETRftkiv1pMZNVxcSAGVekJeqTWbg0Mjpl4f7CjWEsR1Xp5xYHHvj3qFpaY-WbSZwGXHWkRenmEVLWOUsjUYxG2ijVirn_HUTlldaf2ieVOErX51k7FJEi26Z-oBrqbjSOwCirawpIW4h"/>
+                <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent"></div>
+            </div>
+            <div class="relative z-10 max-w-screen-2xl mx-auto px-8 w-full">
+                <div class="max-w-3xl">
+                    <span class="inline-block px-4 py-1.5 mb-6 rounded-full glass-panel border border-white/20 text-primary font-label text-xs font-bold tracking-widest uppercase">
+                        Sistem Keamanan Pengeboran
+                    </span>
+                    <h1 class="font-headline text-5xl md:text-7xl font-bold text-white leading-tight mb-8">
+                        Automatic Mud Detector <br/> <span class="text-blue-300">Well Kick & Blowout</span>
+                    </h1>
+                    <p class="text-xl text-blue-50/80 mb-10 leading-relaxed font-light max-w-2xl">
+                        Prototipe deteksi dini anomali tekanan fluida berbasis mikrokontroler Arduino. Memantau parameter operasional secara <i>real-time</i> untuk mencegah hilangnya keseimbangan hidrostatis pada sumur.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="Illustration.html"> 
+                            <button class="bg-secondary text-on-secondary px-8 py-4 rounded-full font-semibold hover:bg-secondary/90 transition-all shadow-xl shadow-secondary/20">
+                                Lihat Prototipe Simulasi
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-32 px-8 bg-surface" id="Analisis">
+            <div class="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                
+                <div class="lg:col-span-5">
+                    <div class="space-y-6">
+                        <h2 class="font-headline text-4xl font-bold text-primary tracking-tight">Ilustrasi Dinamika Kick</h2>
+                        <p class="text-on-surface-variant text-lg leading-relaxed">
+                            Simulasi interaktif ini mendemonstrasikan secara visual bahaya intrusi gas dari formasi. Tanpa adanya deteksi dini yang akurat dari sensor tekanan, <i>kick</i> kecil dapat memicu ekspansi gas eksponensial.
+                        </p>
+                        
+                        <div class="p-8 bg-surface-container-low rounded-2xl border border-outline-variant/20 shadow-lg mt-8">
+                            <span class="inline-block bg-primary-container text-on-primary-container px-4 py-1.5 rounded-full font-label text-xs font-bold tracking-widest uppercase mb-4" id="phase-counter">
+                                Fase 1 dari 4
+                            </span>
+                            <h3 class="font-headline text-2xl font-bold text-on-surface mb-4" id="phase-title">Kondisi Normal</h3>
+                            <p class="text-on-surface-variant leading-relaxed min-h-[120px] text-sm" id="phase-desc">
+                                Sistem dalam keadaan stabil. Tekanan hidrostatis lumpur pemboran (coklat) berhasil menahan tekanan dari formasi batuan di sekitarnya. Tidak ada intrusi gas.
+                            </p>
+                            
+                            <div class="flex gap-4 mt-6">
+                                <button class="bg-surface-container-highest text-on-surface-variant hover:bg-surface-variant px-6 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed" id="btn-prev" onclick="changePhase(-1)" disabled>
+                                    ← Sebelumnya
+                                </button>
+                                <button class="bg-primary text-on-primary hover:opacity-90 px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-1" id="btn-next" onclick="changePhase(1)">
+                                    Selanjutnya →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7 relative">
+                    <div class="relative rounded-[2rem] overflow-hidden shadow-2xl bg-[#e9eff3] flex items-center justify-center py-20 border border-outline-variant/20 min-h-[500px]">
+                        <div class="absolute inset-0 opacity-[0.15]" style="background-image: linear-gradient(#063f81 1.5px, transparent 1.5px), linear-gradient(90deg, #063f81 1.5px, transparent 1.5px); background-size: 30px 30px;"></div>
+                        
+                        <div class="visual-area z-10 drop-shadow-2xl">
+                            <div class="wellbore border-b-8 border-gray-800">
+                                <div class="blowout-explosion" id="explosion"></div>
+                                <div class="mud" id="mud"></div>
+                                <div class="gas-bubble" id="bubble"></div>
+                            </div>
+                        </div>
+
+                        <div class="absolute bottom-8 left-8 glass-panel p-6 rounded-2xl border border-white/40 max-w-xs shadow-xl hidden md:block">
+                            <div class="flex items-center gap-4">
+                                <span class="material-symbols-outlined text-primary text-3xl">sensors</span>
+                                <div>
+                                    <p class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">Status Prototipe</p>
+                                    <p class="text-xl font-headline font-bold text-primary">Siap Mendeteksi</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-32 px-8 bg-surface-container-low">
+            <div class="max-w-screen-2xl mx-auto">
+                <div class="text-center mb-20">
+                    <h2 class="font-headline text-4xl font-bold text-primary mb-4">Komponen Prototipe</h2>
+                    <p class="text-on-surface-variant max-w-xl mx-auto">Pendekatan <i>hardware</i> dan <i>software</i> sederhana yang menunjang akuisisi data seketika untuk pengambilan keputusan darurat.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2 glass-panel p-10 rounded-3xl border border-white/20 shadow-sm flex flex-col justify-between overflow-hidden relative">
+                        <div class="relative z-10">
+                            <span class="material-symbols-outlined text-primary text-5xl mb-6">dynamic_feed</span>
+                            <h3 class="font-headline text-3xl font-bold mb-4">Telemetri Real-Time</h3>
+                            <p class="text-on-surface-variant text-lg max-w-md">Akuisisi data langsung dari sensor yang membaca tekanan masuk (P-IN) dan tekanan keluar pada anulus (P-OUT) tanpa jeda.</p>
+                        </div>
+                        <div class="mt-12 flex gap-4 relative z-10">
+                            <div class="h-24 w-full bg-surface-container-highest rounded-xl flex items-end p-2 gap-1">
+                                <div class="bg-primary h-1/2 w-full rounded-sm opacity-20"></div>
+                                <div class="bg-primary h-3/4 w-full rounded-sm opacity-40"></div>
+                                <div class="bg-primary h-2/3 w-full rounded-sm opacity-60"></div>
+                                <div class="bg-primary h-5/6 w-full rounded-sm opacity-80"></div>
+                                <div class="bg-primary h-full w-full rounded-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-primary p-10 rounded-3xl shadow-xl flex flex-col justify-between text-white">
+                        <div>
+                            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-6">
+                                <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">memory</span>
+                            </div>
+                            <h3 class="font-headline text-2xl font-bold mb-4">Pemrosesan Arduino</h3>
+                            <p class="text-blue-100 font-light leading-relaxed">Otak dari prototipe. Arduino memproses selisih nilai (Delta P) dan secara otomatis memicu alarm mekanis jika melewati batas aman.</p>
+                        </div>
+                        <button class="mt-8 flex items-center gap-2 font-bold text-sm uppercase tracking-widest text-blue-300 group">
+                            Lihat Rangkaian <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </button>
+                    </div>
+                    <div class="glass-panel p-10 rounded-3xl border border-white/20 shadow-sm group">
+                        <span class="material-symbols-outlined text-secondary text-5xl mb-6">terminal</span>
+                        <h3 class="font-headline text-2xl font-bold mb-4">Antarmuka LCD Lokal</h3>
+                        <p class="text-on-surface-variant font-light mb-8">Informasi status sumur, peringatan, dan angka tekanan disajikan langsung melalui layar LCD fisik kepada operator pengeboran.</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="h-2 w-full bg-outline-variant/30 rounded-full overflow-hidden">
+                                <div class="h-full bg-secondary w-3/4"></div>
+                            </div>
+                            <div class="h-2 w-full bg-outline-variant/30 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary w-1/2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 glass-panel p-10 rounded-3xl border border-white/20 shadow-sm flex items-center gap-10">
+                        <div class="w-1/2">
+                            <h3 class="font-headline text-2xl font-bold mb-4">Simulasi Skala Laboratorium</h3>
+                            <p class="text-on-surface-variant font-light">Validasi konsep dilakukan melalui pipa simulasi mini untuk merepresentasikan kolom sumur hidrostatik dan tekanan formasi tiruan.</p>
+                        </div>
+                        <div class="w-1/2 rounded-2xl overflow-hidden h-48 bg-surface-container-highest">
+                            <img class="w-full h-full object-cover grayscale opacity-50" data-alt="Abstract hardware components" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBay7wlI6FYHoWgfA6FCEhCu70X4PeQYb6bK93SWJwbUkeBf0UxPboZZCRotIQxMhZ9p4xpovEinWh3PyeteW-v-XI4G7OB-A_DmbQp8XoicsuNemeR0cvqpZivFSuNkf0yCm6SICIKSHfC-fYon-G_SD1HvG0MCiOE4BVZ_q9tBlKuBMrCb62APvrZ8J5cxSDUQAh2Qhh8g_JthQ3riLX-lua1vGH_O-i0ktEi_SwklFiJ3qTm_tR4KmoTj3B0ASz9ZEfejM998Rqz"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-24 px-8">
+            <div class="max-w-screen-2xl mx-auto">
+                <div class="relative rounded-[3rem] overflow-hidden bg-primary px-12 py-20 text-center">
+                    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 32px 32px;"></div>
+                    <div class="relative z-10 max-w-2xl mx-auto">
+                        <h2 class="font-headline text-4xl md:text-5xl font-bold text-white mb-6">Siap Menguji Konsep?</h2>
+                        <p class="text-blue-100 text-lg mb-10">Buka *dashboard* prototipe interaktif untuk mensimulasikan respon Arduino terhadap skenario sumur.</p>
+                        <div class="flex justify-center gap-4">
+                            <a href="Illustration.html">
+                                <button class="bg-white text-primary px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition-transform flex items-center justify-center gap-3"> 
+                                    Buka Dasbor Simulasi
+                                    <span class="material-symbols-outlined">dashboard</span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white w-full py-12 border-t border-slate-200">
+        <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-screen-2xl mx-auto">
+            <div class="mb-8 md:mb-0 text-center md:text-left">
+                <div class="font-['Space_Grotesk'] font-bold text-slate-800 text-lg mb-2">Proyek Prototipe Mud Monitor</div>
+                <p class="text-slate-500 text-sm tracking-wide font-['Inter']">© 2026 Kelompok 9 - Tugas PRD.</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-8">
+                <a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-['Inter'] font-semibold" href="landingpage.html">Kembali ke Utama</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let currentPhase = 1;
+
+        const phaseData = {
+            1: {
+                title: "Kondisi Normal",
+                desc: "Sistem dalam keadaan stabil. Tekanan hidrostatis lumpur pemboran (coklat) berhasil menahan tekanan dari formasi batuan di sekitarnya. Tidak ada intrusi gas. Sensor tekanan membaca nilai stabil.",
+                bubble: { width: '0px', height: '0px', bottom: '10px', opacity: 0 },
+                mud: { height: '100%' }, explosion: 0
+            },
+            2: {
+                title: "Terjadi Kick (Intrusi Gas)",
+                desc: "Tekanan hidrostatik lumpur tiba-tiba turun. Gas dari formasi (gelembung putih) menerobos masuk ke dasar sumur. Di sinilah Arduino mendeteksi lonjakan Delta P secara real-time.",
+                bubble: { width: '30px', height: '30px', bottom: '20px', opacity: 1 },
+                mud: { height: '100%' }, explosion: 0
+            },
+            3: {
+                title: "Ekspansi Gas",
+                desc: "Gelembung gas bersirkulasi naik ke permukaan. Karena tekanan lumpur di atasnya semakin kecil, volume gas mengembang sangat pesat secara eksponensial. Sistem darurat harus diaktifkan.",
+                bubble: { width: '75px', height: '75px', bottom: '180px', opacity: 1 },
+                mud: { height: '100%' }, explosion: 0
+            },
+            4: {
+                title: "Semburan Liar (Blowout)",
+                desc: "Gas raksasa mencapai permukaan. Volume dan tekanan gas mendesak seluruh lumpur keluar secara paksa dan destruktif. Kegagalan pencegahan pada fase kick berakibat fatal.",
+                bubble: { width: '180px', height: '180px', bottom: '340px', opacity: 1 },
+                mud: { height: '20%' }, explosion: 1
+            }
+        };
+
+        const elCounter = document.getElementById('phase-counter');
+        const elTitle = document.getElementById('phase-title');
+        const elDesc = document.getElementById('phase-desc');
+        const elBubble = document.getElementById('bubble');
+        const elMud = document.getElementById('mud');
+        const elExplosion = document.getElementById('explosion');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+
+        function updateUI() {
+            const data = phaseData[currentPhase];
+
+            // Teks Update
+            elCounter.innerText = `Fase ${currentPhase} dari 4`;
+            elTitle.innerText = data.title;
+            elDesc.innerText = data.desc;
+
+            // Animasi Update
+            Object.assign(elBubble.style, data.bubble);
+            Object.assign(elMud.style, data.mud);
+            elExplosion.style.opacity = data.explosion;
+
+            // Kontrol Tombol Update
+            btnPrev.disabled = currentPhase === 1;
+            btnNext.disabled = currentPhase === 4;
+            
+            if (currentPhase === 4) {
+                btnNext.innerText = "Selesai";
+            } else {
+                btnNext.innerText = "Selanjutnya →";
+            }
+        }
+
+        function changePhase(step) {
+            currentPhase += step;
+            if(currentPhase < 1) currentPhase = 1;
+            if(currentPhase > 4) currentPhase = 4;
+            updateUI();
+        }
+
+        // Jalankan saat load
+        updateUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Tim Pembuat | Kelompok 9 Prototipe</title>
+     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#063f81",
+                        "primary-container": "#2b579a",
+                        "on-primary": "#ffffff",
+                        "secondary": "#b02e00",
+                        "surface": "#f4fafe",
+                        "surface-container-highest": "#dde3e7",
+                        "surface-container-low": "#eef4f8",
+                        "on-surface": "#161c1f",
+                        "on-surface-variant": "#434750",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .fluid-gradient-bg {
+            background: radial-gradient(circle at 0% 0%, #d7e3ff 0%, transparent 50%),
+                        radial-gradient(circle at 100% 100%, #e0e0ff 0%, transparent 50%),
+                        #f4fafe;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+
+    <nav class="fixed top-0 w-full z-50 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(22,28,31,0.06)]">
+        <div class="flex justify-between items-center h-20 px-8 w-full max-w-screen-2xl mx-auto">
+            <a href="landingpage.html"><div class="font-['Space_Grotesk'] font-bold tracking-tighter text-blue-900 dark:text-blue-100 text-2xl">
+                Mud Monitor
+            </div></a>
+            <div class="hidden md:flex items-center space-x-8 font-['Space_Grotesk'] tracking-tight">
+                <a class="text-blue-900 dark:text-blue-100 border-b-2 border-blue-900 dark:border-blue-400 pb-1" href="landingpage.html">Beranda</a>
+                <a class="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#Analisis">Konsep</a>
+                <a class="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="Illustration.html">Prototipe</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="kelompok.html">
+                    <button class="bg-primary text-on-primary px-6 py-2.5 rounded-full font-medium hover:opacity-90 active:scale-95 transition-all text-sm uppercase tracking-wider">
+                        Kelompok 9
+                    </button> 
+                </a>
+                <img alt="Lead Engineer Profile" class="w-10 h-10 rounded-full border-2 border-primary-container/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc3Hg6D75aGovoC9d4IizCWceNFfoBLihIq7MboKBm18IODOu766sA48z2nmid7uUDdAiPggFxiVq_9b1K8uVXCcJDqg0ChrHhdFFD7sKRAjw_WR6MI_kQFXONTLoBOb2WngR1MZWBrj3yOi6nskg3w4-aGBzAD3vXlB-22L3jyt6_4iMWsrkq8USYPrVfmoYNrzx4tn1rUczdW4cge1ZKX3FH5sMi35vpWhTKuKLsT8avZGikYs-8-OvDASVfOd-RRB7vcgCi1daP"/>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-24 px-8 max-w-screen-2xl mx-auto fluid-gradient-bg">
+        <header class="mb-20 max-w-3xl">
+            <div class="inline-flex items-center px-4 py-1.5 rounded-full bg-primary/10 text-primary mb-6">
+                <span class="material-symbols-outlined text-sm mr-2" style="font-variation-settings: 'FILL' 1;">group</span>
+                <span class="text-xs font-bold uppercase tracking-[0.1em] font-label">Tugas Pengenalan Rekayasa dan Desain</span>
+            </div>
+            <h1 class="text-6xl font-headline font-bold tracking-tighter text-blue-900 mb-6 leading-none">
+                Anggota Tim <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-container">Kelompok 9</span>
+            </h1>
+            <p class="text-lg text-on-surface-variant leading-relaxed font-body max-w-2xl">
+                Pembagian kerja kolaboratif dalam merancang dan menyusun prototipe deteksi dini anomali lumpur berbasis sensor Arduino. Mulai dari perakitan perangkat keras, pemrograman modul, hingga pembuatan model uji coba fisik.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="glass-card rounded-xl p-8 border border-white/40 shadow-xl shadow-blue-900/5 group hover:-translate-y-2 transition-all duration-300">
+                <div class="relative w-24 h-24 mb-8 rounded-full overflow-hidden bg-surface-container-highest">
+                    <img alt="Ahmad Rafli Ramadhan" class="w-full h-full object-cover" data-alt="portrait" src="rafli.jpeg"/>
+                </div>
+                <div class="mb-4">
+                    <p class="text-[0.6875rem] font-bold text-primary tracking-widest font-label uppercase mb-1" style="">Full-Stack Web Dev</p>
+                    <h3 class="text-xl font-headline font-bold text-blue-900">Ahmad Rafli Ramadhan</h3>
+                    <p class="text-sm text-on-surface-variant font-medium mt-1">NIM: 12225123</p>
+                </div>
+                <div class="h-px w-12 bg-primary/20 mb-6 group-hover:w-full transition-all duration-500"></div>
+                <button class="material-symbols-outlined text-primary/60 hover:text-primary transition-colors">architecture</button>
+            </div>
+
+            <div class="glass-card rounded-xl p-8 border border-white/40 shadow-xl shadow-blue-900/5 group hover:-translate-y-2 transition-all duration-300">
+                <div class="relative w-24 h-24 mb-8 rounded-full overflow-hidden bg-surface-container-highest">
+                    <img alt="M.Ikhlassul Amri U." class="w-full h-full object-cover" data-alt="portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfjiThSl91QIaYpKyMNbe2fm5vy0C3UduIqGlxuZh3qLT5oymJB4CPXwJPylGlRT5Lg-DbHUS4Q45UPqh0iK74zSPYNLyGn0Wxx3pbvJ8cYm1kmbqg84fa0HAkBO3nGuWw0FnBqNLsYqPXZV7hozR0kRzNJ4pkipg2OQDOLrKkKOF-K3PLrMczWSF7O2HiSCka_F4yRIeT9rM_M8DKz7o2UdhNAblhPMI4KO0gBuYGGcreTzZH4zILhmyWfdN7ZiMu_QiC8cOR7RcR"/>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-headline font-bold text-blue-900">M.Ikhlassul Amri U.</h3>
+                    <p class="text-sm text-on-surface-variant font-medium mt-1">NIM: 12225120</p>
+                </div>
+                <div class="h-px w-12 bg-primary/20 mb-6 group-hover:w-full transition-all duration-500"></div>
+                <button class="material-symbols-outlined text-primary/60 hover:text-primary transition-colors">terminal</button>
+            </div>
+
+            <div class="glass-card rounded-xl p-8 border border-white/40 shadow-xl shadow-blue-900/5 group hover:-translate-y-2 transition-all duration-300">
+                <div class="relative w-24 h-24 mb-8 rounded-full overflow-hidden bg-surface-container-highest">
+                    <img alt="Brian Wilson" class="w-full h-full object-cover" data-alt="portrait" src="bryan.png"/>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-headline font-bold text-blue-900">Brian Wilson</h3>
+                    <p class="text-sm text-on-surface-variant font-medium mt-1">NIM: 12225126</p>
+                </div>
+                <div class="h-px w-12 bg-primary/20 mb-6 group-hover:w-full transition-all duration-500"></div>
+                <button class="material-symbols-outlined text-primary/60 hover:text-primary transition-colors">memory</button>
+            </div>
+
+            <div class="glass-card rounded-xl p-8 border border-white/40 shadow-xl shadow-blue-900/5 group hover:-translate-y-2 transition-all duration-300">
+                <div class="relative w-24 h-24 mb-8 rounded-full overflow-hidden bg-surface-container-highest">
+                    <img alt="Anwar Fadli A.A.B.S" class="w-full h-full object-cover" data-alt="portrait" src="asanto.jpeg"/>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-headline font-bold text-blue-900">Anwar Fadli A.A.B.S</h3>
+                    <p class="text-sm text-on-surface-variant font-medium mt-1">NIM: 12225129</p>
+                </div>
+                <div class="h-px w-12 bg-primary/20 mb-6 group-hover:w-full transition-all duration-500"></div>
+                <button class="material-symbols-outlined text-primary/60 hover:text-primary transition-colors">waves</button>
+            </div>
+
+            <div class="glass-card rounded-xl p-8 border border-white/40 shadow-xl shadow-blue-900/5 group hover:-translate-y-2 transition-all duration-300">
+                <div class="relative w-24 h-24 mb-8 rounded-full overflow-hidden bg-surface-container-highest">
+                    <img alt="Fathan Akbar F." class="w-full h-full object-cover" data-alt="portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-dOktJ3fmB92kGkK1wzef1fI4Yj2Ba5wttxggQZHUnpArZ0RF3zza3eW26rGjd3UionwwTlqoTmqfoO8PheCBUSHHkGVMBvKHxcX5c5VVVNWrhEk6kLfyddTQsUIyJX8LNWrbOGKD3qrBUxW5bZLfPFTLi5V8IJxQVN0sEwxlLcQmRiwmLB1YSVqiAfOXyonNdbnLq_AmOFvCHdGaaklxWkAkd6z1jSMfGgISrAHJT7SVZybSJVbOjN-o5taD0EEJ3eSiT_dYlkTj"/>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-headline font-bold text-blue-900">Fathan Akbar F.</h3>
+                    <p class="text-sm text-on-surface-variant font-medium mt-1">NIM: 12225132</p>
+                </div>
+                <div class="h-px w-12 bg-primary/20 mb-6 group-hover:w-full transition-all duration-500"></div>
+                <button class="material-symbols-outlined text-primary/60 hover:text-primary transition-colors">web</button>
+            </div>
+
+            <div class="glass-card rounded-xl p-8 border border-white/40 shadow-xl shadow-blue-900/5 group hover:-translate-y-2 transition-all duration-300">
+                <div class="relative w-24 h-24 mb-8 rounded-full overflow-hidden bg-surface-container-highest">
+                    <img alt="M.Fakhri Gunawan" class="w-full h-full object-cover" data-alt="portrait" src="fahri.jpeg"/>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-xl font-headline font-bold text-blue-900">M.Fakhri Gunawan</h3>
+                    <p class="text-sm text-on-surface-variant font-medium mt-1">NIM: 12225135</p>
+                </div>
+                <div class="h-px w-12 bg-primary/20 mb-6 group-hover:w-full transition-all duration-500"></div>
+                <button class="material-symbols-outlined text-primary/60 hover:text-primary transition-colors">engineering</button>
+            </div>
+
+        </div>
+
+        <section class="mt-32 flex flex-col md:flex-row gap-12 items-center">
+            <div class="w-full md:w-1/2 glass-card rounded-xl p-10 border border-white/40 relative overflow-hidden shadow-lg">
+                <div class="absolute top-0 right-0 p-8 opacity-10">
+                    <span class="material-symbols-outlined text-9xl" style="font-variation-settings: 'FILL' 1;">precision_manufacturing</span>
+                </div>
+                <h2 class="text-3xl font-headline font-bold text-blue-900 mb-6 tracking-tight">Fokus Pengujian Konsep</h2>
+                <p class="text-on-surface-variant mb-8 leading-relaxed">
+                    Setiap anggota kelompok berkontribusi dalam memastikan bahwa sirkuit alat uji ini benar-benar bisa mensimulasikan terjadinya perbedaan tekanan yang diakibatkan oleh gas. Kami berfokus pada keandalan logika sensor dalam mengenali transisi fase dari aman hingga bahaya.
+                </p>
+            </div>
+            
+            <div class="w-full md:w-1/2 flex flex-col gap-6">
+                <div class="flex items-start gap-6 p-6 surface-container-low rounded-xl border border-white/20 shadow-sm">
+                    <div class="bg-primary text-on-primary p-3 rounded-lg">
+                        <span class="material-symbols-outlined">hardware</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-blue-900 font-headline">Rakit Uji Skala Lab</h4>
+                        <p class="text-sm text-on-surface-variant mt-1">Menggunakan material sederhana untuk membentuk U-Tube yang merepresentasikan sumur sebelum dihubungkan ke sensor elektronik.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-6 p-6 surface-container-low rounded-xl border border-white/20 shadow-sm">
+                    <div class="bg-primary-container text-on-primary-container p-3 rounded-lg">
+                        <span class="material-symbols-outlined">bug_report</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-blue-900 font-headline">Debugging & Evaluasi</h4>
+                        <p class="text-sm text-on-surface-variant mt-1">Tahap penyempurnaan sensitivitas pembacaan Arduino agar alarm (buzzer) tidak menyala oleh kesalahan pembacaan (noise).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white w-full py-12 border-t border-slate-200">
+        <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-screen-2xl mx-auto">
+            <div class="mb-8 md:mb-0 text-center md:text-left">
+                <div class="font-['Space_Grotesk'] font-bold text-slate-800 text-lg mb-2">Proyek Prototipe Mud Monitor</div>
+                <p class="text-slate-500 text-sm tracking-wide font-['Inter']">© 2026 Kelompok 9 - Tugas PRD.</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-8">
+                <a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-['Inter'] font-semibold" href="landingpage.html">Kembali ke Utama</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

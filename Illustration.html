@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Mud Monitor | Real-Time Dashboard ResikGO</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Courier+New&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                  "primary": "#063f81",
+                  "primary-container": "#2b579a",
+                  "on-primary": "#ffffff",
+                  "secondary": "#b02e00",
+                  "tertiary": "#28329c",
+                  "background": "#f4fafe",
+                  "surface": "#f4fafe",
+                  "surface-container-highest": "#dde3e7",
+                  "surface-container-high": "#e3e9ed",
+                  "surface-container-low": "#eef4f8",
+                  "on-surface": "#161c1f",
+                  "on-surface-variant": "#434750",
+                  "outline-variant": "#c3c6d2",
+                  "error-container": "#ffdad6",
+                  "on-error-container": "#93000a",
+              },
+              fontFamily: {
+                  "headline": ["Space Grotesk", "sans-serif"],
+                  "body": ["Inter", "sans-serif"],
+                  "label": ["Inter", "sans-serif"],
+                  "mono": ["Courier New", "monospace"]
+              }
+            },
+          },
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        /* VISUALISASI PROTOTIPE SUMUR */
+        :root {
+            --mud-color: #795548;
+            --well-border: #424242;
+            --lcd-green: #22c55e;
+            --lcd-red: #ef4444;
+        }
+
+        .visual-area {
+            position: relative;
+            width: 200px;
+            height: 380px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 20px;
+        }
+
+        .wellbore {
+            width: 80px;
+            height: 300px;
+            background-color: #d7ccc8;
+            border-left: 20px solid var(--well-border);
+            border-right: 20px solid var(--well-border);
+            border-bottom: 20px solid var(--well-border);
+            position: relative;
+            border-radius: 0 0 12px 12px;
+            z-index: 2;
+        }
+
+        .mud {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            background-color: var(--mud-color);
+            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+        }
+
+        .gas-bubble {
+            position: absolute; left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(200,200,200,0.6));
+            border-radius: 50%;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 4;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.2);
+            width: 0px; height: 0px; bottom: 10px; opacity: 0;
+        }
+
+        .blowout-explosion {
+            position: absolute; top: -80px; left: 50%;
+            transform: translateX(-50%); width: 200px; height: 120px;
+            background: radial-gradient(circle, #ff5722 10%, #ff9800 40%, transparent 70%);
+            opacity: 0; transition: opacity 0.3s ease-in;
+            z-index: 5; pointer-events: none; filter: blur(5px);
+        }
+
+        .transducer {
+            position: absolute; width: 24px; height: 24px;
+            background-color: #fbbf24; border: 3px solid #b45309; border-radius: 50%;
+            z-index: 10; display: flex; justify-content: center; align-items: center;
+            font-size: 10px; font-weight: bold; color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .transducer::after { content: ''; position: absolute; width: 40px; height: 2px; background-color: #fbbf24; z-index: -1; }
+        #t1 { bottom: 30px; left: -10px; } #t1::after { left: 20px; width: 30px;}
+        #t2 { top: 30px; right: -10px; } #t2::after { right: 20px; width: 30px; }
+
+        /* Panel LCD Text Glow */
+        .lcd-text { color: var(--lcd-green); text-shadow: 0 0 5px var(--lcd-green); transition: all 0.3s; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .alert-active { color: var(--lcd-red) !important; text-shadow: 0 0 8px var(--lcd-red) !important; animation: blink 0.5s infinite; }
+    </style>
+</head>
+ <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<body class="bg-background font-body text-on-background min-h-screen flex flex-col">
+
+<!-- Top Navigation Bar -->
+ <nav class="fixed top-0 w-full z-50 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(22,28,31,0.06)]">
+        <div class="flex justify-between items-center h-20 px-8 w-full max-w-screen-2xl mx-auto">
+            <a href="landingpage.html"><div class="font-['Space_Grotesk'] font-bold tracking-tighter text-blue-900 dark:text-blue-100 text-2xl">
+                Mud Monitor
+            </div></a>
+            <div class="hidden md:flex items-center space-x-8 font-['Space_Grotesk'] tracking-tight">
+                <a class="text-blue-900 dark:text-blue-100 border-b-2 border-blue-900 dark:border-blue-400 pb-1" href="landingpage.html">Beranda</a>
+                <a class="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#Analisis">Konsep</a>
+                <a class="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="Illustration.html">Prototipe</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="kelompok.html">
+                    <button class="bg-primary text-on-primary px-6 py-2.5 rounded-full font-medium hover:opacity-90 active:scale-95 transition-all text-sm uppercase tracking-wider">
+                        Kelompok 9
+                    </button> 
+                </a>
+                <img alt="Lead Engineer Profile" class="w-10 h-10 rounded-full border-2 border-primary-container/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc3Hg6D75aGovoC9d4IizCWceNFfoBLihIq7MboKBm18IODOu766sA48z2nmid7uUDdAiPggFxiVq_9b1K8uVXCcJDqg0ChrHhdFFD7sKRAjw_WR6MI_kQFXONTLoBOb2WngR1MZWBrj3yOi6nskg3w4-aGBzAD3vXlB-22L3jyt6_4iMWsrkq8USYPrVfmoYNrzx4tn1rUczdW4cge1ZKX3FH5sMi35vpWhTKuKLsT8avZGikYs-8-OvDASVfOd-RRB7vcgCi1daP"/>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-28 pb-12 px-8 max-w-screen-2xl mx-auto w-full grid grid-cols-12 gap-8">
+        
+        <aside class="col-span-12 md:col-span-2 flex flex-col gap-4">
+            <h2 class="font-headline text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Pilih Fase</h2>
+            <div class="flex flex-col gap-2" id="phase-buttons">
+                <button id="btn-1" onclick="setPhase(1)" class="flex items-center justify-between p-4 rounded-xl font-headline transition-all bg-primary text-on-primary shadow-lg">
+                    <span>1. Normal</span><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;" id="icon-1">radio_button_checked</span>
+                </button>
+                <button id="btn-2" onclick="setPhase(2)" class="flex items-center justify-between p-4 rounded-xl font-headline transition-all bg-surface-container-highest text-on-surface-variant hover:bg-surface-container-high">
+                    <span>2. Kick</span><span class="material-symbols-outlined" id="icon-2">circle</span>
+                </button>
+                <button id="btn-3" onclick="setPhase(3)" class="flex items-center justify-between p-4 rounded-xl font-headline transition-all bg-surface-container-highest text-on-surface-variant hover:bg-surface-container-high">
+                    <span>3. Expansion</span><span class="material-symbols-outlined" id="icon-3">circle</span>
+                </button>
+                <button id="btn-4" onclick="setPhase(4)" class="flex items-center justify-between p-4 rounded-xl font-headline transition-all bg-surface-container-highest text-on-surface-variant hover:bg-surface-container-high">
+                    <span>4. Blowout</span><span class="material-symbols-outlined" id="icon-4">circle</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="col-span-12 md:col-span-10 flex flex-col gap-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="glass-panel p-6 rounded-xl border border-outline-variant/10 shadow-lg flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="material-symbols-outlined text-primary bg-blue-100 p-2 rounded-lg">science</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Density</span>
+                    </div>
+                    <div class="mt-4 flex items-baseline gap-1">
+                        <span class="text-4xl font-headline font-bold text-primary" id="hero-density">9.42</span>
+                        <span class="text-sm font-label text-on-surface-variant">ppg</span>
+                    </div>
+                </div>
+                <div class="glass-panel p-6 rounded-xl border border-outline-variant/10 shadow-lg flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="material-symbols-outlined text-secondary bg-red-100 p-2 rounded-lg">compress</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Annulus Press (T2)</span>
+                    </div>
+                    <div class="mt-4 flex items-baseline gap-1">
+                        <span class="text-4xl font-headline font-bold text-primary" id="hero-pressure">150</span>
+                        <span class="text-sm font-label text-on-surface-variant">psi</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-2 glass-panel rounded-xl overflow-hidden border border-outline-variant/10 shadow-2xl flex flex-col">
+                    <div class="p-6 flex justify-between items-center border-b border-outline-variant/10 bg-white/50">
+                        <div>
+                            <h3 class="font-headline font-bold text-xl text-primary">Automated Mud Monitor Simulation</h3>
+                            <p class="text-xs text-on-surface-variant font-label tracking-wide mt-1">Sistem Deteksi Dini Lonjakan Tekanan & Anomali Aliran</p>
+                        </div>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-[10px] font-bold uppercase tracking-tighter" id="badge-phase">Fase 1/4</span>
+                    </div>
+
+                    <div class="relative flex-grow bg-slate-50 flex flex-col sm:flex-row p-6 gap-8 min-h-[400px]">
+                        <div class="visual-area shrink-0 mx-auto sm:mx-0">
+                            <div class="wellbore">
+                                <div class="transducer" id="t2" title="Transducer 2 (Outlet)">T2</div>
+                                <div class="transducer" id="t1" title="Transducer 1 (Inlet)">T1</div>
+                                <div class="blowout-explosion" id="explosion"></div>
+                                <div class="mud" id="mud"></div>
+                                <div class="gas-bubble" id="bubble"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex-grow flex flex-col justify-center">
+                            <div class="bg-slate-900 rounded-xl p-4 border-4 border-slate-700 relative shadow-2xl mb-6">
+                                <div class="absolute -top-3 left-4 bg-blue-600 text-white px-2 py-0.5 text-[10px] rounded font-bold tracking-widest">MCU READOUT</div>
+                                <div class="bg-[#022c22] p-4 rounded border inset-2 border-[#064e3b] font-mono text-sm lcd-text" id="lcd">
+                                    <div class="flex justify-between mb-2">
+                                        <span>P-IN (T1): <span id="val-t1">150</span> psi</span>
+                                        <span>P-OUT (T2): <span id="val-t2">150</span> psi</span>
+                                    </div>
+                                    <div class="flex justify-between mb-2">
+                                        <span>&Delta;P (T2-T1): <span id="val-delta">0</span> psi</span>
+                                    </div>
+                                    <div class="text-center mt-3 pt-2 border-t border-emerald-900/50 font-bold" id="val-status">STATUS: NORMAL</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-xl p-6 border border-outline-variant/20 shadow-sm">
+                                <h2 id="phase-title" class="font-headline text-xl font-bold text-primary mb-3">1. Sirkulasi Normal</h2>
+                                <p id="phase-desc" class="text-sm text-on-surface-variant leading-relaxed min-h-[80px]">Sistem stabil.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 rounded-xl p-6 h-full flex flex-col justify-between overflow-hidden relative shadow-2xl">
+                    <div class="relative z-10">
+                        <p class="font-label text-[10px] uppercase text-blue-200/60 mb-2">System Diagnostics</p>
+                        <h4 class="font-headline font-bold text-white text-lg">Reservoir Model</h4>
+                    </div>
+                    
+                    <div class="relative z-10 bg-black/40 backdrop-blur-md rounded-lg p-5 border border-white/10 mt-4 flex-grow flex flex-col justify-center gap-6">
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] text-white/70 font-label tracking-widest">BHP MARGIN</span>
+                                <span id="diag-bhp-text" class="text-xs font-headline font-bold uppercase tracking-wide">Stable</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div id="diag-bhp-bar" class="h-full rounded-full transition-all duration-700 ease-out w-full"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] text-white/70 font-label tracking-widest">KICK TOLERANCE</span>
+                                <span id="diag-kick-text" class="text-xs font-headline font-bold uppercase tracking-wide">Optimal</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div id="diag-kick-bar" class="h-full rounded-full transition-all duration-700 ease-out w-full"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="diag-warning-box" class="mt-4 border border-white/10 bg-white/5 rounded p-3 text-[10px] text-white/60 font-mono transition-colors duration-500">
+                            > SYSTEM IDLE. NO ANOMALY.
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentPhase = 1;
+
+        // Data Integrasi: LCD, Animasi Visual, dan Panel Diagnostik Interaktif
+        const phaseData = {
+            1: {
+                title: "1. Sirkulasi Normal",
+                desc: "Sistem stabil. Tekanan fluida yang masuk (T1) seimbang dengan yang keluar (T2) di anulus. Mikrokontroler Arduino membaca Delta P stabil di angka 0. Sumur dalam keadaan Overbalanced (Aman).",
+                bubble: { width: '0px', height: '0px', bottom: '10px', opacity: 0 },
+                mud: { height: '100%' }, explosion: 0, density: "9.42",
+                sensor: { t1: 150, t2: 150, delta: 0, status: "STATUS: NORMAL", alert: false },
+                // Data untuk panel System Diagnostics
+                diag: { 
+                    bhp: { text: "Stable", width: "100%", colorClass: "bg-blue-500", textClass: "text-blue-400" },
+                    kick: { text: "Optimal", width: "95%", colorClass: "bg-emerald-500", textClass: "text-emerald-400" },
+                    warningBox: "> SYSTEM IDLE. NO ANOMALY.", warningClass: "bg-white/5 border-white/10 text-white/60"
+                }
+            },
+            2: {
+                title: "2. Kick Masuk! (Deteksi Dini)",
+                desc: "Gas dari formasi menerobos masuk! Fluida formasi mendorong lumpur di anulus ke atas, menyebabkan lonjakan tekanan seketika di Transducer 2 (T2). Prototipe mendeteksi Delta P menembus batas aman dan MEMICU ALARM.",
+                bubble: { width: '35px', height: '35px', bottom: '25px', opacity: 1 },
+                mud: { height: '100%' }, explosion: 0, density: "9.10",
+                sensor: { t1: 150, t2: 185, delta: 35, status: "!! ALARM: KICK DETECTED !!", alert: true },
+                // Data Diagnostics berubah saat kick masuk
+                diag: { 
+                    bhp: { text: "Dropping", width: "65%", colorClass: "bg-yellow-500", textClass: "text-yellow-400" },
+                    kick: { text: "Warning", width: "50%", colorClass: "bg-yellow-500", textClass: "text-yellow-400" },
+                    warningBox: "> WARNING: INFLUX DETECTED. PREPARE SHUT-IN.", warningClass: "bg-yellow-500/20 border-yellow-500/50 text-yellow-300"
+                }
+            },
+            3: {
+                title: "3. Ekspansi Gas Berbahaya",
+                desc: "Sesuai Hukum Boyle, saat gas bersirkulasi naik menuju permukaan, tekanan hidrostatik yang menahannya mengecil sehingga volume gas berekspansi pesat. Pembacaan T2 melonjak drastis mendesak lumpur keluar sumur.",
+                bubble: { width: '75px', height: '75px', bottom: '180px', opacity: 1 },
+                mud: { height: '100%' }, explosion: 0, density: "8.25",
+                sensor: { t1: 150, t2: 240, delta: 90, status: "!! CRITICAL: EXPANSION !!", alert: true },
+                // Data Diagnostics kritis
+                diag: { 
+                    bhp: { text: "Critical", width: "20%", colorClass: "bg-orange-500", textClass: "text-orange-400 animate-pulse" },
+                    kick: { text: "Critical", width: "15%", colorClass: "bg-orange-500", textClass: "text-orange-400 animate-pulse" },
+                    warningBox: "> CRITICAL: VOLUME EXPANDING RAPIDLY. DANGER.", warningClass: "bg-orange-500/20 border-orange-500/50 text-orange-300"
+                }
+            },
+            4: {
+                title: "4. Blowout (Semburan Liar)",
+                desc: "Terlambat. Gas mencapai permukaan dan menyemburkan seluruh lumpur formasi. Sensor tekanan mengalami pembacaan maksimum/error karena kehilangan kolom hidrostatik sama sekali.",
+                bubble: { width: '180px', height: '180px', bottom: '340px', opacity: 1 },
+                mud: { height: '20%' }, explosion: 1, density: "ERR",
+                sensor: { t1: 0, t2: 999, delta: 999, status: "SYS FAILURE - BLOWOUT", alert: true },
+                // Data Diagnostics gagal (kosong dan merah berkedip)
+                diag: { 
+                    bhp: { text: "FAILED", width: "0%", colorClass: "bg-red-600", textClass: "text-red-500 animate-pulse" },
+                    kick: { text: "FAILED", width: "0%", colorClass: "bg-red-600", textClass: "text-red-500 animate-pulse" },
+                    warningBox: "> SYSTEM COMPROMISED. BLOWOUT OCCURRED.", warningClass: "bg-red-600/30 border-red-500 text-red-200 font-bold animate-pulse"
+                }
+            }
+        };
+
+        // DOM Elements - Text & Visual
+        const elTitle = document.getElementById('phase-title');
+        const elDesc = document.getElementById('phase-desc');
+        const elBadge = document.getElementById('badge-phase');
+        const elBubble = document.getElementById('bubble');
+        const elMud = document.getElementById('mud');
+        const elExplosion = document.getElementById('explosion');
+        
+        // DOM Elements - Sensor & Top Stats
+        const lcdScreen = document.getElementById('lcd');
+        const vT1 = document.getElementById('val-t1');
+        const vT2 = document.getElementById('val-t2');
+        const vDelta = document.getElementById('val-delta');
+        const vStatus = document.getElementById('val-status');
+        const heroPressure = document.getElementById('hero-pressure');
+        const heroDensity = document.getElementById('hero-density');
+
+        // DOM Elements - System Diagnostics (Reservoir Model)
+        const diagBhpText = document.getElementById('diag-bhp-text');
+        const diagBhpBar = document.getElementById('diag-bhp-bar');
+        const diagKickText = document.getElementById('diag-kick-text');
+        const diagKickBar = document.getElementById('diag-kick-bar');
+        const diagWarningBox = document.getElementById('diag-warning-box');
+
+        // DOM Elements - Navigation Sidebar
+        const btns = [1, 2, 3, 4].map(id => document.getElementById(`btn-${id}`));
+        const icons = [1, 2, 3, 4].map(id => document.getElementById(`icon-${id}`));
+
+        // Logika Utama Update UI
+        function setPhase(phaseNumber) {
+            currentPhase = phaseNumber;
+            const data = phaseData[currentPhase];
+
+            // 1. Update Konten Deskripsi
+            elBadge.innerText = `Fase ${currentPhase}/4`;
+            elTitle.innerText = data.title;
+            elDesc.innerText = data.desc;
+
+            // 2. Update Animasi Sumur Fisik
+            Object.assign(elBubble.style, data.bubble);
+            Object.assign(elMud.style, data.mud);
+            elExplosion.style.opacity = data.explosion;
+
+            // 3. Update LCD & Hero Stats
+            vT1.innerText = data.sensor.t1;
+            vT2.innerText = data.sensor.t2;
+            vDelta.innerText = "+"+data.sensor.delta;
+            vStatus.innerText = data.sensor.status;
+            heroPressure.innerText = data.sensor.t2;
+            heroDensity.innerText = data.density;
+
+            if(data.sensor.alert) {
+                lcdScreen.classList.add("alert-active");
+            } else {
+                lcdScreen.classList.remove("alert-active");
+            }
+
+            // ==========================================
+            // 4. UPDATE SYSTEM DIAGNOSTICS (INTERAKTIF)
+            // ==========================================
+            
+            // Update BHP Margin
+            diagBhpText.innerText = data.diag.bhp.text;
+            diagBhpText.className = `text-xs font-headline font-bold uppercase tracking-wide ${data.diag.bhp.textClass}`;
+            diagBhpBar.className = `h-full rounded-full transition-all duration-700 ease-out ${data.diag.bhp.colorClass}`;
+            diagBhpBar.style.width = data.diag.bhp.width;
+
+            // Update Kick Tolerance
+            diagKickText.innerText = data.diag.kick.text;
+            diagKickText.className = `text-xs font-headline font-bold uppercase tracking-wide ${data.diag.kick.textClass}`;
+            diagKickBar.className = `h-full rounded-full transition-all duration-700 ease-out ${data.diag.kick.colorClass}`;
+            diagKickBar.style.width = data.diag.kick.width;
+
+            // Update Console Warning Box
+            diagWarningBox.innerText = data.diag.warningBox;
+            diagWarningBox.className = `mt-4 border rounded p-3 text-[10px] font-mono transition-colors duration-500 ${data.diag.warningClass}`;
+
+            // 5. Update UI Sidebar Button
+            btns.forEach((btn, index) => {
+                const isActive = (index + 1) === currentPhase;
+                if (isActive) {
+                    btn.className = "flex items-center justify-between p-4 rounded-xl font-headline transition-all bg-primary text-on-primary shadow-lg scale-105";
+                    icons[index].innerText = "radio_button_checked";
+                    icons[index].style.fontVariationSettings = "'FILL' 1";
+                } else {
+                    btn.className = "flex items-center justify-between p-4 rounded-xl font-headline transition-all bg-surface-container-highest text-on-surface-variant hover:bg-surface-container-high";
+                    icons[index].innerText = "circle";
+                    icons[index].style.fontVariationSettings = "'FILL' 0";
+                }
+            });
+        }
+        // Inisialisasi awal saat web dibuka
+        setPhase(1);
+    </script>
+    <footer class="bg-white w-full py-12 border-t border-slate-200">
+        <div class="flex flex-col md:flex-row justify-between items-center px-8 max-w-screen-2xl mx-auto">
+            <div class="mb-8 md:mb-0 text-center md:text-left">
+                <div class="font-['Space_Grotesk'] font-bold text-slate-800 text-lg mb-2">Proyek Prototipe Mud Monitor</div>
+                <p class="text-slate-500 text-sm tracking-wide font-['Inter']">© 2026 Kelompok 9 - Tugas PRD.</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-8">
+                <a class="text-slate-500 hover:text-blue-600 transition-colors text-sm font-['Inter'] font-semibold" href="landingpage.html">Kembali ke Utama</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
